@@ -217,5 +217,4 @@ Follow the actionable guide in [`docs/recovery-and-containment.md`](docs/recover
 
 > [!WARNING]
 > - **Live Rate Limit Monitoring**: GitHub enforces a 5,000 requests/hour core quota. The execution scripts track rate limits dynamically. If remaining quota falls below 1,000 requests, execution will safely checkpoint and pause.
-> - **Untrusted Scripts**: Never execute `scripts/github_cleaner.py`. It is preserved strictly as historical lead evidence.
 > - **Branch Scope**: All automated operations target the repository default branch. Unmerged branches, release tags, and local developer workstations require separate manual verification.
