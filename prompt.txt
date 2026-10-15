@@ -1,0 +1,74 @@
+================================================================================
+ANTIGRAVITY (AGY) PROMPT CHEATSHEET FOR GITHUB INCIDENT RESPONSE
+================================================================================
+
+When you clone this repository and launch Antigravity (agy) in this directory:
+1. Ensure GitHub CLI is logged in: `gh auth status`
+2. Copy and paste one of the prompts below directly into your Antigravity chat.
+
+--------------------------------------------------------------------------------
+OPTION 1: COMPLETE TWO-STAGE INCIDENT INVESTIGATION & CLEANUP (RECOMMENDED)
+--------------------------------------------------------------------------------
+
+Act as a senior security incident-response engineer. 
+
+I suspect my personal GitHub repositories may be affected by an automated compromise or malicious commits. 
+Using the playbook in SKILL.md and the scripts in this repository:
+
+1. STAGE 1 (READ-ONLY INVESTIGATION):
+   - Authenticate via `gh auth token` and inventory all my accessible repositories.
+   - Partition scope: only include my personally owned repositories; exclude collaborator-owned and organization-owned repositories.
+   - Detect any automated push surges, amended commit timestamps, or anomalous update clusters.
+   - Deep-scan 100% of my repository trees against the signatures in docs/malware-indicators.md and false-positive rules in docs/false-positives.md.
+   - Check all default branches (and active feature branches if present).
+   - Inventory any tracked .env or secret files without printing or logging secret values.
+   - Pre-generate clean surgical replacement patches in a local `patches/` folder.
+   - Compile a machine-readable `remediation-manifest.json` and present an evidence summary to me.
+
+DO NOT execute any remote writes or modify any GitHub repositories during Stage 1. 
+Stop and wait for my review and explicit authorization before applying any changes.
+
+
+--------------------------------------------------------------------------------
+OPTION 2: AUTHORIZATION TO EXECUTE CLEANUP (STAGE 2)
+--------------------------------------------------------------------------------
+(Run this after you have reviewed the Stage 1 report and manifest)
+
+I have reviewed the Stage 1 findings and the remediation-manifest.json. 
+I hereby authorize Stage 2 cleanup.
+
+Please:
+1. Verify live branch tips against baseline commit SHAs (Compare-and-Swap protection).
+2. Execute atomic Git Database API commits across all confirmed infected repositories to remove malicious files and apply clean patches.
+3. Perform read-only post-commit tree validation on every updated repository.
+4. Ensure .gitignore rules are in place and purge any tracked .vscode/ workspace folders.
+5. Generate the final remediation report and execution ledger.
+
+
+--------------------------------------------------------------------------------
+OPTION 3: MULTI-BRANCH SCAN & REMEDIATION (FOR TEAMS WITH DEV/STAGING/FEATURE BRANCHES)
+--------------------------------------------------------------------------------
+
+Act as a senior security incident-response engineer using the SKILL.md playbook.
+
+My repositories have multiple active branches (e.g., main, dev, staging, feature branches).
+Please perform an investigation across ALL active branches in my personally owned repositories:
+
+1. Enumerate all branches per repository using `GET /repos/{owner}/{repo}/branches`.
+2. Inspect the file tree of every active branch against the malware signatures in docs/malware-indicators.md.
+3. Generate a remediation plan that tracks actions per repository and branch.
+4. Keep this initial phase strictly read-only and present the multi-branch findings to me before taking action.
+
+
+--------------------------------------------------------------------------------
+OPTION 4: REPOSITORY HARDENING & SECRET AUDIT ONLY
+--------------------------------------------------------------------------------
+
+Act as a security engineer using the SKILL.md playbook in this repository.
+
+I want to harden all my personally owned GitHub repositories:
+1. Inspect all repositories for pre-existing tracked `.env` or credential files (record metadata only, never print secret values).
+2. Standardize `.gitignore` across all repositories to exclude `.env`, `.env.*`, and `.vscode/` while preserving allowed templates (`!.env.example`, `!.env.sample`, `!.env.template`).
+3. Purge the `.vscode/` directory from Git tracking across all repositories.
+4. Apply changes using atomic, CAS-protected commits and verify the resulting trees.
+================================================================================
