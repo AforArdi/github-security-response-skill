@@ -3,7 +3,7 @@
 This directory documents non-executing validation, static syntax checking, and safe unit-testing procedures for the GitHub Security Incident Response Toolkit.
 
 > [!CAUTION]
-> **STRICT SAFETY RULE**: Never execute operational remediation scripts (`execute_bulk_cleanup_v2.py`, `execute_hardening.py`, or `github_cleaner.py`) during tests. These scripts interact with live GitHub API endpoints and alter remote repository refs. Testing must be performed strictly using static analysis, syntax compilation, or mocked fixtures.
+> **STRICT SAFETY RULE**: Never execute operational remediation scripts (`execute_bulk_cleanup_v2.py` or `execute_hardening.py`) during tests. These scripts interact with live GitHub API endpoints and alter remote repository refs. Testing must be performed strictly using static analysis, syntax compilation, or mocked fixtures.
 
 ---
 

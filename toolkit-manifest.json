@@ -370,29 +370,6 @@
       "limitations": "Local file generator."
     },
     {
-      "filename": "github_cleaner.py",
-      "path": "scripts/github_cleaner.py",
-      "size_bytes": 13527,
-      "sha256": "83246425829cfa6a4628b2c5d019e9e2f66d7f08a9d0e490aacc184713fc1bc7",
-      "category": "Untrusted External Reference (Initial Lead)",
-      "safety_classification": "NOT_SAFE_TO_RUN_UNTRUSTED",
-      "review_status": "AUDITED_UNSAFE_DO_NOT_EXECUTE",
-      "http_methods": [
-        "PUT",
-        "DELETE",
-        "GET"
-      ],
-      "description": "Untrusted script provided by user as an initial lead. Employs heuristic filename-based deletion and direct REST file PUT/DELETE without CAS protection or atomic tree commits.",
-      "inputs": [
-        "GITHUB_TOKEN environment variable",
-        "user/repos"
-      ],
-      "outputs": [
-        "Direct remote file deletions and updates"
-      ],
-      "limitations": "Lacks CAS, lacks atomic commits, violates Safety Rules 6 and 7. Do not execute."
-    },
-    {
       "filename": "hardening_plan.py",
       "path": "scripts/hardening_plan.py",
       "size_bytes": 8225,

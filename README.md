@@ -65,7 +65,6 @@ github-security-response-skill/
 │   ├── generate_phase3_reports.py    # Phase 3 cleanup summary report compiler
 │   ├── generate_summary_reports.py   # HISTORICAL: Phase 1 report generator
 │   ├── generate_summary_reports_reviewed.py # REVIEWED: Corrected Phase 1 generator
-│   ├── github_cleaner.py             # UNTRUSTED LEAD: Untrusted initial script (DO NOT RUN)
 │   ├── hardening_plan.py             # Pre-hardening scanner & tracked .env discovery
 │   ├── inventory_recon.py            # Complete Phase 1 account reconnaissance engine
 │   ├── scan_and_prepare_remediation.py # Phase 2 100% scanner & patch generator
@@ -111,7 +110,6 @@ Every script in `scripts/` has been inspected for security, network behavior, an
 | **`generate_knowledge_artifacts.py`** | Reporting | `SAFE_READ_ONLY_LOCAL` | `NONE` | Compiles Phase 2 analysis, signatures JSON, and false-positives guide. |
 | **`generate_phase3_reports.py`** | Reporting | `SAFE_READ_ONLY_LOCAL` | `NONE` | Compiles Phase 3 bulk cleanup ledger and post-commit verification report. |
 | **`finalize_hardening_reports.py`** | Reporting | `SAFE_READ_ONLY_LOCAL` | `NONE` | Compiles final hardening report and updates checkpoint telemetry. |
-| **`github_cleaner.py`** | Untrusted Reference | `NOT_SAFE_TO_RUN_UNTRUSTED` | `PUT, DELETE` | **Untrusted initial script**. Heuristic file deletion without CAS. Do not run. |
 
 ---
 
