@@ -1,0 +1,39 @@
+{
+  "investigation_id": "INC-YYYYMMDD-ORGANIZATION-OR-ACCOUNT",
+  "phase": "REMEDIATION_EXECUTION",
+  "started_at": "YYYY-MM-DDTHH:MM:SSZ",
+  "last_updated_at": "YYYY-MM-DDTHH:MM:SSZ",
+  "status": "IN_PROGRESS",
+  "target_scope": {
+    "account": "REPLACE_WITH_ACCOUNT_OR_ORG",
+    "total_in_scope_repositories": 0,
+    "excluded_collaborator_repositories": 0,
+    "excluded_external_repositories": 0
+  },
+  "progress_counters": {
+    "total_evaluated": 0,
+    "successfully_remediated": 0,
+    "already_clean_or_compliant": 0,
+    "skipped_due_to_conflicts": 0,
+    "failed_or_errored": 0,
+    "post_commit_verified": 0
+  },
+  "rate_limit_tracking": {
+    "initial_core_quota": 5000,
+    "current_core_remaining": 5000,
+    "quota_consumed": 0,
+    "safety_floor_threshold": 1000,
+    "reset_timestamp_epoch": 0,
+    "reset_timestamp_iso": "YYYY-MM-DDTHH:MM:SSZ"
+  },
+  "last_processed": {
+    "repository": "",
+    "default_branch": "",
+    "previous_commit_sha": "",
+    "remediation_commit_sha": "",
+    "status": ""
+  },
+  "completed_repositories": [],
+  "pending_repositories": [],
+  "failed_repositories": []
+}

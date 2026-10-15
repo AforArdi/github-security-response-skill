@@ -1,0 +1,11 @@
+# GitHub Security Incident Response Toolkit Dependencies
+#
+# Primary runtime requirements:
+# Python 3.10+
+# GitHub CLI (`gh`) v2.40.0+ authenticated via `gh auth login` with `repo` and `read:org` scopes.
+
+# HTTP client library for GitHub REST and GraphQL API communication
+requests>=2.31.0,<=2.34.2
+
+# Development and testing requirements (optional):
+# pytest>=7.4.0

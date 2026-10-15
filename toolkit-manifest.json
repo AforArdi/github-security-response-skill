@@ -1,0 +1,530 @@
+{
+  "toolkit_metadata": {
+    "name": "github-security-response-skill",
+    "version": "1.0.0",
+    "created_at": "2026-10-15T19:15:00Z",
+    "lead_investigator": "Senior Security Incident-Response Engineer",
+    "incident_reference": "INC-20261014-AforArdi",
+    "description": "Evidence-driven, two-stage incident response playbook and toolkit for investigating, scanning, remediating, and hardening GitHub repositories affected by coordinated compromises."
+  },
+  "operating_modes": {
+    "investigation_mode": "Strictly read-only operations via GitHub API. Performs inventory, threat modeling, signature validation, full-scope scanning, and pre-generates local patches and manifests with zero remote modifications.",
+    "remediation_mode": "Authorized atomic writes via GitHub Git Database REST API. Enforces Compare-and-Swap (CAS) parent verification, blob creation, single-commit tree mutations, non-forced ref updates, and immediate post-commit verification."
+  },
+  "dependencies": {
+    "python_runtime": "Python 3.10+",
+    "external_cli": "GitHub CLI (gh) authenticated with repo and read:org scopes",
+    "python_libraries": [
+      "requests>=2.31.0,<=2.34.2"
+    ]
+  },
+  "scripts": [
+    {
+      "filename": "analyze_inventory.py",
+      "path": "scripts/analyze_inventory.py",
+      "size_bytes": 2900,
+      "sha256": "6f8d74c9243a3e6701f4db6e850b2271f67781a830bcdea8e08310a984651e7d",
+      "category": "Reconnaissance & Timeline Analysis",
+      "safety_classification": "SAFE_READ_ONLY_LOCAL",
+      "review_status": "REVIEWED_AND_VERIFIED",
+      "http_methods": [
+        "NONE (Local file processor)"
+      ],
+      "description": "Parses repository inventory JSON/CSV, analyzes pushed_at timestamps across all repositories, and detects automated batch push windows.",
+      "inputs": [
+        "recon-20261015_003000/repository-inventory.json"
+      ],
+      "outputs": [
+        "Console timeline analysis output"
+      ],
+      "limitations": "Requires pre-generated repository-inventory.json from inventory_recon.py."
+    },
+    {
+      "filename": "analyze_signatures.py",
+      "path": "scripts/analyze_signatures.py",
+      "size_bytes": 7962,
+      "sha256": "2e971a99a962312b2f6d2d372775d483d8372471c914fe6b20b4937bae1a4c36",
+      "category": "Malware Analysis & Signature Formulation",
+      "safety_classification": "SAFE_READ_ONLY_REMOTE",
+      "review_status": "REVIEWED_AND_VERIFIED",
+      "http_methods": [
+        "GET"
+      ],
+      "description": "Performs deep read-only inspection of 10 representative repositories, inspecting fonts, .vscode tasks, api.js, and config files to establish malware signatures.",
+      "inputs": [
+        "GitHub REST API via gh auth token"
+      ],
+      "outputs": [
+        "Console signature analysis and candidate pattern metrics"
+      ],
+      "limitations": "Targets specific representative sample repositories; read-only."
+    },
+    {
+      "filename": "check_amended_files.py",
+      "path": "scripts/check_amended_files.py",
+      "size_bytes": 1997,
+      "sha256": "b61a95f70f5f850df62b1cc01e5692255bfae6b9cb9e916c4f39eeacfa6de8e7",
+      "category": "Reconnaissance & History Audit",
+      "safety_classification": "SAFE_READ_ONLY_REMOTE",
+      "review_status": "REVIEWED_AND_VERIFIED",
+      "http_methods": [
+        "GET"
+      ],
+      "description": "Audits commit history and tree differences for suspicious repositories to detect backdated author timestamps vs actual committer timestamps.",
+      "inputs": [
+        "recon-20261015_003000/repository-inventory.json",
+        "GitHub REST API"
+      ],
+      "outputs": [
+        "Console commit tree analysis"
+      ],
+      "limitations": "Read-only history inspection."
+    },
+    {
+      "filename": "check_other_pushed.py",
+      "path": "scripts/check_other_pushed.py",
+      "size_bytes": 2176,
+      "sha256": "88af88e3b05fe20b0abda354e035f41300bbfc9220ca257dcc4f9390ba8bba51",
+      "category": "Reconnaissance & Anomaly Detection",
+      "safety_classification": "SAFE_READ_ONLY_REMOTE",
+      "review_status": "REVIEWED_AND_VERIFIED",
+      "http_methods": [
+        "GET"
+      ],
+      "description": "Cross-references push timestamps across all personal repositories to detect whether repositories outside the primary cluster were touched.",
+      "inputs": [
+        "recon-20261015_003000/repository-inventory.json",
+        "GitHub REST API"
+      ],
+      "outputs": [
+        "Console push audit log"
+      ],
+      "limitations": "Read-only."
+    },
+    {
+      "filename": "compare_payloads.py",
+      "path": "scripts/compare_payloads.py",
+      "size_bytes": 1938,
+      "sha256": "c140c50ef27795d69f83013827210fb5e0459c4c86dd502b288e747eb4a1ba38",
+      "category": "Malware Analysis & Binary Comparison",
+      "safety_classification": "SAFE_READ_ONLY_REMOTE",
+      "review_status": "REVIEWED_AND_VERIFIED",
+      "http_methods": [
+        "GET"
+      ],
+      "description": "Compares cryptographic hashes and byte contents of fa-brands-400.ttf, api.js, and postcss.config.mjs across multiple repositories to prove campaign coordination.",
+      "inputs": [
+        "GitHub REST API contents endpoints"
+      ],
+      "outputs": [
+        "Console payload comparison matrix"
+      ],
+      "limitations": "Read-only payload inspection."
+    },
+    {
+      "filename": "examine_oct_commits.py",
+      "path": "scripts/examine_oct_commits.py",
+      "size_bytes": 1412,
+      "sha256": "0d0ba9c9780ce24ac543fc61d5404a095bddeb1a0bc28a9cb9563d0edc2b449d",
+      "category": "Reconnaissance & Timeline Analysis",
+      "safety_classification": "SAFE_READ_ONLY_LOCAL",
+      "review_status": "REVIEWED_AND_VERIFIED",
+      "http_methods": [
+        "NONE (Local file processor)"
+      ],
+      "description": "Analyzes commit date distributions across October 2026 to correlate commit activity spikes with threat actor actions.",
+      "inputs": [
+        "branch-and-tag-inventory.csv",
+        "repository-inventory.json"
+      ],
+      "outputs": [
+        "Console timeline breakdown"
+      ],
+      "limitations": "Requires pre-generated inventory files."
+    },
+    {
+      "filename": "execute_bulk_cleanup.py",
+      "path": "scripts/execute_bulk_cleanup.py",
+      "size_bytes": 15085,
+      "sha256": "3c688703c4d8d634b39682825ed707bbb8fd904a0f628c2ec0f8cb5beb84d6a9",
+      "category": "Remediation Execution (Prototype / Historical)",
+      "safety_classification": "REMOTE_WRITE_REQUIRES_AUTHORIZATION",
+      "review_status": "REVIEWED_HISTORICAL_SUPERSEDED",
+      "http_methods": [
+        "POST",
+        "PATCH"
+      ],
+      "description": "First iteration of the atomic bulk cleanup script. Attempted singular /git/ref/ endpoint which returned HTTP 404, leading to the development of v2.",
+      "inputs": [
+        "remediation-manifest.json",
+        "patches/ directory",
+        "GitHub Git Database API"
+      ],
+      "outputs": [
+        "cleanup-YYYYMMDD_HHMMSS/ execution artifacts"
+      ],
+      "limitations": "Superceded by execute_bulk_cleanup_v2.py; contains singular ref endpoint bug."
+    },
+    {
+      "filename": "execute_bulk_cleanup_v2.py",
+      "path": "scripts/execute_bulk_cleanup_v2.py",
+      "size_bytes": 18084,
+      "sha256": "4a901c2dc2b2b11b4fc9764666a03ee479fa578ed7ee783444ee9aab4efbaf11",
+      "category": "Remediation Execution (Production)",
+      "safety_classification": "REMOTE_WRITE_REQUIRES_AUTHORIZATION",
+      "review_status": "REVIEWED_AND_VERIFIED",
+      "http_methods": [
+        "POST",
+        "PATCH",
+        "GET"
+      ],
+      "description": "Production bulk remediation engine. Applies atomic Git Database API commits across all 92 infected repos with live CAS branch tip validation, blob uploads, tree deletions, and post-commit tree checks.",
+      "inputs": [
+        "remediation-manifest.json",
+        "patches/ directory",
+        "GitHub REST API"
+      ],
+      "outputs": [
+        "remediation-execution-log.csv",
+        "post-remediation-verification.csv",
+        "cleanup-checkpoint.json"
+      ],
+      "limitations": "Performs remote state mutations; requires explicit human authorization and active gh auth token."
+    },
+    {
+      "filename": "execute_hardening.py",
+      "path": "scripts/execute_hardening.py",
+      "size_bytes": 16227,
+      "sha256": "6d87357be130da10973de1ff998a2c837734c6f688f5a7329da91fbd7a166ba6",
+      "category": "Security Hardening Execution",
+      "safety_classification": "REMOTE_WRITE_REQUIRES_AUTHORIZATION",
+      "review_status": "REVIEWED_AND_VERIFIED",
+      "http_methods": [
+        "POST",
+        "PATCH",
+        "GET"
+      ],
+      "description": "Applies account-wide security hardening commits across all 95 personal repos. Completely deletes .vscode/ directories, appends standardized .env and .vscode rules to .gitignore, and executes CAS-protected commits.",
+      "inputs": [
+        "hardening-manifest.json",
+        "GitHub REST API"
+      ],
+      "outputs": [
+        "repository-hardening-log.csv",
+        "hardening-checkpoint.json"
+      ],
+      "limitations": "Performs remote state mutations; requires explicit human authorization."
+    },
+    {
+      "filename": "extract_iocs.py",
+      "path": "scripts/extract_iocs.py",
+      "size_bytes": 2686,
+      "sha256": "5432f17a8745cb9884db308e5f90841199f6fe8d379f4b50e03754c81d2ea9ea",
+      "category": "Malware Analysis & IoC Extraction",
+      "safety_classification": "SAFE_READ_ONLY_REMOTE",
+      "review_status": "REVIEWED_AND_VERIFIED",
+      "http_methods": [
+        "GET"
+      ],
+      "description": "Extracts and decodes hex-encoded strings and threat indicators from fa-brands-400.ttf and api.js without executing the suspicious files.",
+      "inputs": [
+        "GitHub REST API contents endpoints"
+      ],
+      "outputs": [
+        "Console decoded strings and IoC catalog"
+      ],
+      "limitations": "Read-only static decoding."
+    },
+    {
+      "filename": "finalize_hardening_reports.py",
+      "path": "scripts/finalize_hardening_reports.py",
+      "size_bytes": 9875,
+      "sha256": "3f15558cb85d269dd6e4cc0a1030e52c22daf5dd80553b5faf1da447aaccf5b1",
+      "category": "Verification & Reporting",
+      "safety_classification": "SAFE_READ_ONLY_LOCAL",
+      "review_status": "REVIEWED_AND_VERIFIED",
+      "http_methods": [
+        "NONE (Local report compiler)"
+      ],
+      "description": "Compiles the final hardening checkpoint and generates the formal hardening summary report from execution logs.",
+      "inputs": [
+        "repository-hardening-log.csv",
+        "tracked-environment-files.csv"
+      ],
+      "outputs": [
+        "hardening-summary.md",
+        "hardening-checkpoint.json"
+      ],
+      "limitations": "Requires existing hardening execution logs."
+    },
+    {
+      "filename": "gate_validation.py",
+      "path": "scripts/gate_validation.py",
+      "size_bytes": 2871,
+      "sha256": "7a65440248082a1972fc2e5e11563250ed66a1bbfae0a0359d3216379f93ddb4",
+      "category": "Remediation Safety Gate",
+      "safety_classification": "SAFE_READ_ONLY_REMOTE",
+      "review_status": "REVIEWED_AND_VERIFIED",
+      "http_methods": [
+        "GET"
+      ],
+      "description": "Pre-modification verification gate. Queries live default-branch tips of all 92 infected repos to guarantee 0% branch divergence before cleanup authorization.",
+      "inputs": [
+        "remediation-manifest.json",
+        "repository-findings.csv",
+        "GitHub REST API"
+      ],
+      "outputs": [
+        "Console gate verification ledger"
+      ],
+      "limitations": "Read-only."
+    },
+    {
+      "filename": "generate_knowledge_artifacts.py",
+      "path": "scripts/generate_knowledge_artifacts.py",
+      "size_bytes": 23412,
+      "sha256": "6d63ee24fbd93d15eb25cff09d287f766f52e7efa28371b7ac0b8f96a302d693",
+      "category": "Verification & Reporting",
+      "safety_classification": "SAFE_READ_ONLY_LOCAL",
+      "review_status": "REVIEWED_AND_VERIFIED",
+      "http_methods": [
+        "NONE (Local generator)"
+      ],
+      "description": "Generates Phase 2 documentation artifacts: malware-analysis.md, false-positives.md, malware-signatures.json, and phase-2-summary.md.",
+      "inputs": [
+        "remediation-manifest.json",
+        "repository-findings.csv"
+      ],
+      "outputs": [
+        "malware-analysis.md",
+        "false-positives.md",
+        "malware-signatures.json",
+        "phase-2-summary.md"
+      ],
+      "limitations": "Local file generator."
+    },
+    {
+      "filename": "generate_phase3_reports.py",
+      "path": "scripts/generate_phase3_reports.py",
+      "size_bytes": 9974,
+      "sha256": "4e0fcf47e7eaba8873eb4b0c54ae7f35a35860a78affafd4b2a29c67906f5339",
+      "category": "Verification & Reporting",
+      "safety_classification": "SAFE_READ_ONLY_LOCAL",
+      "review_status": "REVIEWED_AND_VERIFIED",
+      "http_methods": [
+        "NONE (Local report compiler)"
+      ],
+      "description": "Generates the Phase 3 bulk cleanup executive summary report from remediation execution logs and post-remediation verifications.",
+      "inputs": [
+        "remediation-execution-log.csv",
+        "post-remediation-verification.csv"
+      ],
+      "outputs": [
+        "phase-3-summary.md",
+        "cleanup-checkpoint.json"
+      ],
+      "limitations": "Local file generator."
+    },
+    {
+      "filename": "generate_summary_reports.py",
+      "path": "scripts/generate_summary_reports.py",
+      "size_bytes": 17872,
+      "sha256": "c14f7f1e31d15feafa454491589e06aaec5dcf82c382eda66ff52e0e0df9db4f",
+      "category": "Verification & Reporting (Original Unedited)",
+      "safety_classification": "SAFE_READ_ONLY_LOCAL (SYNTAX_ERROR_IN_PY312)",
+      "review_status": "HISTORICAL_EVIDENCE_PRESERVED",
+      "http_methods": [
+        "NONE (Local report compiler)"
+      ],
+      "description": "Original Phase 1 report generator. Preserved for forensic fidelity; contains unescaped \\U path string in non-raw docstring which triggers syntax error in Python 3.12+.",
+      "inputs": [
+        "repository-inventory.json",
+        "branch-and-tag-inventory.csv"
+      ],
+      "outputs": [
+        "reconnaissance-summary.md",
+        "access-limitations.md"
+      ],
+      "limitations": "Use generate_summary_reports_reviewed.py for execution."
+    },
+    {
+      "filename": "generate_summary_reports_reviewed.py",
+      "path": "scripts/generate_summary_reports_reviewed.py",
+      "size_bytes": 18161,
+      "sha256": "56c924370f44f62970925417bf15bdc62912b42e3d4288b62be75dd7610e936e",
+      "category": "Verification & Reporting (Reviewed & Cleaned)",
+      "safety_classification": "SAFE_READ_ONLY_LOCAL",
+      "review_status": "REVIEWED_AND_VERIFIED",
+      "http_methods": [
+        "NONE (Local report compiler)"
+      ],
+      "description": "Corrected version of generate_summary_reports.py using raw docstrings (r\"\"\") to prevent Unicode escape syntax errors under Python 3.12+.",
+      "inputs": [
+        "repository-inventory.json",
+        "branch-and-tag-inventory.csv"
+      ],
+      "outputs": [
+        "reconnaissance-summary.md",
+        "access-limitations.md"
+      ],
+      "limitations": "Local file generator."
+    },
+    {
+      "filename": "github_cleaner.py",
+      "path": "scripts/github_cleaner.py",
+      "size_bytes": 13527,
+      "sha256": "83246425829cfa6a4628b2c5d019e9e2f66d7f08a9d0e490aacc184713fc1bc7",
+      "category": "Untrusted External Reference (Initial Lead)",
+      "safety_classification": "NOT_SAFE_TO_RUN_UNTRUSTED",
+      "review_status": "AUDITED_UNSAFE_DO_NOT_EXECUTE",
+      "http_methods": [
+        "PUT",
+        "DELETE",
+        "GET"
+      ],
+      "description": "Untrusted script provided by user as an initial lead. Employs heuristic filename-based deletion and direct REST file PUT/DELETE without CAS protection or atomic tree commits.",
+      "inputs": [
+        "GITHUB_TOKEN environment variable",
+        "user/repos"
+      ],
+      "outputs": [
+        "Direct remote file deletions and updates"
+      ],
+      "limitations": "Lacks CAS, lacks atomic commits, violates Safety Rules 6 and 7. Do not execute."
+    },
+    {
+      "filename": "hardening_plan.py",
+      "path": "scripts/hardening_plan.py",
+      "size_bytes": 8225,
+      "sha256": "941fe30961a79d6ba535710fb453b0d8c3e73d771d85ccd3630f4d78a039cb82",
+      "category": "Remediation Planning & Secret Discovery",
+      "safety_classification": "SAFE_READ_ONLY_REMOTE",
+      "review_status": "REVIEWED_AND_VERIFIED",
+      "http_methods": [
+        "GET"
+      ],
+      "description": "Pre-hardening scanner. Inspects all 95 personal repos for tracked .vscode/ files, audits .gitignore rules, and discovers pre-existing tracked .env files without printing secret contents.",
+      "inputs": [
+        "recon-20261015_003000/repository-inventory.json",
+        "GitHub REST API"
+      ],
+      "outputs": [
+        "tracked-environment-files.csv",
+        "hardening-manifest.json"
+      ],
+      "limitations": "Read-only audit."
+    },
+    {
+      "filename": "inventory_recon.py",
+      "path": "scripts/inventory_recon.py",
+      "size_bytes": 14205,
+      "sha256": "8950e8460f5013a1e3dae4b7e15df5b08d2ad07e31655865ace93b70d4fc05e9",
+      "category": "Reconnaissance & Inventory",
+      "safety_classification": "SAFE_READ_ONLY_REMOTE",
+      "review_status": "REVIEWED_AND_VERIFIED",
+      "http_methods": [
+        "GET"
+      ],
+      "description": "Full-scale Phase 1 reconnaissance engine. Fully paginates all accessible repositories, partitions scope into personal vs collaborator, and enumerates branches, tags, commit SHAs, and rate limits.",
+      "inputs": [
+        "GitHub REST API via gh auth token"
+      ],
+      "outputs": [
+        "repository-inventory.json",
+        "repository-inventory.csv",
+        "branch-and-tag-inventory.csv"
+      ],
+      "limitations": "Strictly read-only; paginates all accessible repos."
+    },
+    {
+      "filename": "scan_and_prepare_remediation.py",
+      "path": "scripts/scan_and_prepare_remediation.py",
+      "size_bytes": 24632,
+      "sha256": "0880071c9b15fa87b17d389bf1a438b7608de6ba76418158b74c13d408641647",
+      "category": "Scanning & Patch Generation",
+      "safety_classification": "SAFE_READ_ONLY_REMOTE",
+      "review_status": "REVIEWED_AND_VERIFIED",
+      "http_methods": [
+        "GET"
+      ],
+      "description": "Full-scale Phase 2 scanning and patch preparation engine. Scans 100% of personal repo trees, matches against validated signatures, generates clean surgical patches in patches/, and outputs the 1,732-action manifest.",
+      "inputs": [
+        "recon-20261015_003000/repository-inventory.json",
+        "GitHub REST API"
+      ],
+      "outputs": [
+        "remediation-manifest.json",
+        "repository-findings.csv",
+        "patches/ directory",
+        "checkpoint.json"
+      ],
+      "limitations": "Strictly read-only remote access; creates local patches only."
+    },
+    {
+      "filename": "test_conn.py",
+      "path": "scripts/test_conn.py",
+      "size_bytes": 385,
+      "sha256": "51d1772512e2c3663b522e8c4146a15cb46eb770f3648093f8c0e3987a302249",
+      "category": "Connectivity & Authentication Verification",
+      "safety_classification": "SAFE_READ_ONLY_REMOTE",
+      "review_status": "REVIEWED_AND_VERIFIED",
+      "http_methods": [
+        "GET"
+      ],
+      "description": "Lightweight sanity check verifying GitHub CLI token retrieval and REST API connectivity against /user.",
+      "inputs": [
+        "gh auth token"
+      ],
+      "outputs": [
+        "Console status code and username"
+      ],
+      "limitations": "Read-only."
+    }
+  ],
+  "documentation": [
+    {
+      "filename": "incident-response-workflow.md",
+      "path": "docs/incident-response-workflow.md",
+      "description": "Complete step-by-step incident response operational workflow from anomaly detection to verified cleanup and post-incident response."
+    },
+    {
+      "filename": "malware-indicators.md",
+      "path": "docs/malware-indicators.md",
+      "description": "Detailed forensic documentation of the 4 malware persistence mechanisms, file hashes, magic bytes, and C2 IoCs."
+    },
+    {
+      "filename": "false-positives.md",
+      "path": "docs/false-positives.md",
+      "description": "Preservation rules distinguishing legitimate fonts, VS Code configurations, package scripts, and API files from malware."
+    },
+    {
+      "filename": "recovery-and-containment.md",
+      "path": "docs/recovery-and-containment.md",
+      "description": "Credential revocation, workstation sanitation, tracked .env handling, and Git history rewriting limitations."
+    }
+  ],
+  "templates": [
+    {
+      "filename": "incident-checklist.md",
+      "path": "templates/incident-checklist.md",
+      "description": "Actionable multi-stage checklist covering all operational gates."
+    },
+    {
+      "filename": "incident-report-template.md",
+      "path": "templates/incident-report-template.md",
+      "description": "Formal executive and technical final report template."
+    },
+    {
+      "filename": "checkpoint-template.json",
+      "path": "templates/checkpoint-template.json",
+      "description": "Reusable JSON schema for tracking batch execution and API rate-limit state."
+    }
+  ],
+  "tests": [
+    {
+      "filename": "README.md",
+      "path": "tests/README.md",
+      "description": "Non-executing test harness, AST compilation checks, hash verification, and mocked testing guidance."
+    }
+  ]
+}
