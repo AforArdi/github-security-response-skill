@@ -46,6 +46,7 @@ github-security-response-skill/
 ├── SKILL.md                          # Primary operational playbook and methodology
 ├── README.md                         # Architecture overview, script catalog & safety guide
 ├── requirements.txt                  # Pinned dependencies (requests) & prerequisites
+├── prompt.txt                        # Ready-to-use Antigravity (agy) prompt cheatsheet
 ├── toolkit-manifest.json             # Machine-readable inventory with hashes and review status
 ├── scripts/                          # Preserved original & reviewed investigation scripts
 │   ├── analyze_inventory.py          # Timeline and push surge analysis
@@ -132,7 +133,29 @@ Every script in `scripts/` has been inspected for security, network behavior, an
 
 ---
 
-## 5. Standard Operating Procedure (SOP)
+## 5. Recommended Prompting Sequence for Antigravity (agy)
+
+When your teammates clone this repository and use Antigravity, we strongly recommend following this exact execution sequence from [`prompt.txt`](prompt.txt):
+
+```mermaid
+flowchart TD
+    A["Step 1 (First): Option 1<br/>(or Option 3 for multi-branch repos)"] -->|Produces| B["Read-Only Census, Findings & Manifest<br/>(Zero Remote Risk)"]
+    B --> C{"Teammate Reviews Manifest & Patches"}
+    C -->|Approved| D["Step 2 (Next): Option 2<br/>(Authorized Cleanup)"]
+    D -->|Applies| E["Atomic CAS Commits & Verified Trees"]
+    E --> F["Step 3 (Follow-up): Option 4<br/>(Repository Hardening & Secret Discovery)"]
+```
+
+1. **Step 1 (First): Run Option 1** *(or **Option 3** if repositories maintain active `dev`, `staging`, or feature branches)*:
+   - **Why first**: It is **100% read-only**. It scans all repositories, detects infected files, validates false positives, pre-generates clean replacement patches in `patches/`, and compiles `remediation-manifest.json` **without touching or modifying anything on GitHub**.
+2. **Step 2 (Next): Run Option 2 (Authorized Cleanup)**:
+   - **Why next**: After the teammate reviews the findings and approves the manifest, Option 2 executes atomic Git Database API commits protected by Compare-and-Swap (CAS) parent verification and immediately verifies the resulting trees.
+3. **Step 3 (Follow-up): Run Option 4 (Security Hardening & Secret Discovery)**:
+   - **Why follow-up**: Enforces account-wide `.gitignore` rules (excluding `.env`, `.env.*`, and `.vscode/`) and purges dormant `.vscode/` directories across all repositories.
+
+---
+
+## 6. Standard Operating Procedure (Manual CLI SOP)
 
 ### Step 1: Investigation & Full Scan (Investigation Mode)
 ```bash
@@ -190,7 +213,7 @@ Follow the actionable guide in [`docs/recovery-and-containment.md`](docs/recover
 
 ---
 
-## 6. Safety Warnings & Limitations
+## 7. Safety Warnings & Limitations
 
 > [!WARNING]
 > - **Live Rate Limit Monitoring**: GitHub enforces a 5,000 requests/hour core quota. The execution scripts track rate limits dynamically. If remaining quota falls below 1,000 requests, execution will safely checkpoint and pause.
