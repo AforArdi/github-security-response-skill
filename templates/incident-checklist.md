@@ -116,3 +116,8 @@
   - [ ] Audit developer workstation for automated task execution artifacts (check processes, startup tasks, shell profiles).
   - [ ] Clear editor workspace cache and disable automatic task execution globally (`"task.allowAutomaticTasks": false`).
   - [ ] Synchronize local repository clones by pulling clean remote branches (`git pull origin <default-branch>`).
+- [ ] **6.4 Prevent Commit Spoofing & Attribution Tampering**
+  - [ ] Configure Git SSH commit signing globally (`commit.gpgsign true`, `gpg.format ssh`, `merge.gpgsign true`).
+  - [ ] Register developer SSH public key as a **Signing Key** on GitHub (`https://github.com/settings/keys`).
+  - [ ] Verify local commits receive the green `Verified` badge on GitHub.
+  - [ ] (Recommended) Enable **Require signed commits** on repository branch protection rules for production branches.

@@ -216,3 +216,50 @@ Follow the actionable guide in [`docs/recovery-and-containment.md`](docs/recover
 > [!WARNING]
 > - **Live Rate Limit Monitoring**: GitHub enforces a 5,000 requests/hour core quota. The execution scripts track rate limits dynamically. If remaining quota falls below 1,000 requests, execution will safely checkpoint and pause.
 > - **Branch Scope**: All automated operations target the repository default and existing branches on the repo. Unmerged branches, release tags, and local developer workstations require separate manual verification.
+
+---
+
+## 8. Preventing False Commit Attribution (Cryptographic Commit Signing)
+
+### The Threat: Author Spoofing & Malicious Amends
+In Git, commit author metadata (`user.name` and `user.email`) is plain text and unauthenticated by default. When developer workstations are compromised, modern malware scripts frequently:
+1. Read the local Git log (`git log -1`) to identify the most active legitimate contributor on the branch.
+2. Amend or forge commits using that contributor's exact name and email address.
+3. Push malicious payloads through compromised credentials while making it appear in GitHub's commit UI that the clean contributor introduced the code.
+
+To make yourself and your team immune to false attribution, **cryptographically sign all commits using your local SSH key**. Any commit amended or forged without your private key will lack your digital seal and will be flagged as `Unverified`.
+
+### 3-Step Setup for Developers (Windows / macOS / Linux)
+
+#### Step 1: Copy your existing public SSH key
+- **Windows (PowerShell)**:
+  ```powershell
+  Get-Content "$HOME\.ssh\id_ed25519.pub" | Set-Clipboard
+  ```
+- **macOS / Linux**:
+  ```bash
+  cat ~/.ssh/id_ed25519.pub | pbcopy # macOS
+  cat ~/.ssh/id_ed25519.pub | xclip -selection clipboard # Linux
+  ```
+
+#### Step 2: Register it on GitHub as a "Signing Key"
+1. Open GitHub: [https://github.com/settings/keys](https://github.com/settings/keys).
+2. Click **New SSH key**.
+3. Set **Key type** to **`Signing Key`** *(do not leave as Authentication Key)*.
+4. Paste your public key and click **Add SSH key**.
+
+#### Step 3: Enable automatic signing in Git
+Run these commands in your terminal:
+```bash
+git config --global gpg.format ssh
+git config --global user.signingkey "$HOME/.ssh/id_ed25519.pub"
+git config --global commit.gpgsign true
+git config --global merge.gpgsign true
+```
+*(On Windows PowerShell, use `"$HOME/.ssh/id_ed25519.pub"` or your custom key path like `"$HOME/.ssh/id_ed25519_new.pub"`)*.
+
+### How this Protects Your Development & Merge Workflow
+* **Feature Branches**: Every commit you create is automatically signed with your private key.
+* **Pulling Teammate Branches**: When you pull or merge a teammate's branch into your branch, the resulting merge commit is automatically signed by you.
+* **Merging to `main`**: Merging into `main` (fast-forward or merge commit) preserves your cryptographic signature. GitHub displays the bright green **`Verified`** badge on `main`.
+* **Repository-Level Immunity**: Repository owners should enable **Require signed commits** under **Settings $\rightarrow$ Branches $\rightarrow$ Branch protection rules**. GitHub will automatically reject any push containing unsigned or tampered commits, completely preventing impersonation attacks.

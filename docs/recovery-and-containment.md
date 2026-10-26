@@ -77,6 +77,40 @@ Adding `.env` to `.gitignore` does **not** stop Git from tracking files that wer
    git push origin <default-branch>
    ```
 
+### 2.3 Prevent Commit Spoofing & Attribution Tampering (SSH Commit Signing)
+
+A critical lesson of automated multi-repository malware campaigns is **attribution evasion through commit amending**:
+- In Git, the commit author and committer headers (`user.name`, `user.email`) are plain text and unauthenticated by default.
+- When an infected machine or compromised token modifies a branch, it frequently amends commits or sets the author field to match a legitimate developer on that project (such as the branch owner or lead maintainer).
+- GitHub matches the email string to the developer's user profile and displays their avatar, misleading reviewers into believing the legitimate contributor pushed the malicious changes.
+
+#### Cryptographic Immunity via SSH Signing:
+To permanently prevent false attribution, developers contributing to repositories should cryptographically sign all commits and merges:
+
+1. **Register Signing Key on GitHub**:
+   - Copy developer public SSH key (`~/.ssh/id_ed25519.pub`).
+   - Navigate to GitHub Settings $\rightarrow$ **SSH and GPG keys** $\rightarrow$ **New SSH key**.
+   - Select **Key type**: **`Signing Key`** and save.
+
+2. **Configure Local Git Client**:
+   ```bash
+   # Enable SSH format for commit signing
+   git config --global gpg.format ssh
+
+   # Point to local public key (private key stays secure locally)
+   git config --global user.signingkey "$HOME/.ssh/id_ed25519.pub"
+
+   # Automatically sign all regular commits and merge commits
+   git config --global commit.gpgsign true
+   git config --global merge.gpgsign true
+   ```
+
+3. **Protection in Maintainer Workflows**:
+   - **Feature Commits**: Signed automatically with the developer's private key.
+   - **Merging Teammate Branches**: When pulling or merging teammate code into a maintainer branch, the resulting merge commit is signed by the maintainer.
+   - **Merging to `main`**: Signed merges show the green **`Verified`** badge on GitHub, proving the maintainer reviewed, tested, and certified the integration.
+   - **Branch Protection Rule**: Repository administrators should enable **Require signed commits** under Branch Protection Rules to programmatically reject unsigned commits or forged amends.
+
 ---
 
 ## 3. Developer Workstation Sanitation & Host Response
