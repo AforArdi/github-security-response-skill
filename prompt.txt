@@ -71,4 +71,25 @@ I want to harden all my personally owned GitHub repositories:
 2. Standardize `.gitignore` across all repositories to exclude `.env`, `.env.*`, and `.vscode/` while preserving allowed templates (`!.env.example`, `!.env.sample`, `!.env.template`).
 3. Purge the `.vscode/` directory from Git tracking across all repositories.
 4. Apply changes using atomic, CAS-protected commits and verify the resulting trees.
+
+
+--------------------------------------------------------------------------------
+OPTION 5: ENFORCE "REQUIRE SIGNED COMMITS" RULESET ACROSS ALL REPOSITORIES
+--------------------------------------------------------------------------------
+
+Act as a GitHub security engineer using the SKILL.md playbook.
+
+I want to prevent unauthorized, forged, or amended commits from being pushed to my GitHub repositories.
+Please configure a repository ruleset requiring signed commits across all my personally owned repositories:
+
+1. Connect via `gh auth token` / GitHub CLI.
+2. Enumerate all personally owned repositories (with proper pagination).
+3. Identify eligible repositories:
+   - On GitHub Free tier, apply the ruleset to all Public repositories (Rulesets are free for public repos).
+   - For Private repositories on GitHub Free tier, skip them with a clear explanatory notice (since GitHub requires a paid plan for private rulesets).
+4. For each eligible repository:
+   - Check if an active ruleset requiring signed commits already exists; skip if already present.
+   - Deploy an active branch ruleset named "Require Signed Commits" targeting all branches (`~ALL`) with rule `required_signatures`.
+5. Test and verify on one repository first, then execute across all eligible repositories using scripts/enforce_signed_commits_ruleset.py.
+6. Provide a clean summary report of configured repositories and any skipped repositories.
 ================================================================================

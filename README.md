@@ -105,6 +105,7 @@ Every script in `scripts/` has been inspected for security, network behavior, an
 | **`execute_bulk_cleanup_v2.py`** | Remediation (Production) | `REMOTE_WRITE_AUTHORIZATION_REQUIRED` | `POST, PATCH, GET` | **Production cleanup engine**. Applies atomic commits via Git Database API with CAS. |
 | **`execute_bulk_cleanup.py`** | Remediation (Prototype) | `REMOTE_WRITE_AUTHORIZATION_REQUIRED` | `POST, PATCH` | Prototype cleanup script; superseded by v2. |
 | **`execute_hardening.py`** | Hardening Execution | `REMOTE_WRITE_AUTHORIZATION_REQUIRED` | `POST, PATCH, GET` | Applies `.gitignore` updates and `.vscode/` purges with CAS protection. |
+| **`enforce_signed_commits_ruleset.py`** | Policy Enforcement | `REMOTE_WRITE_AUTHORIZATION_REQUIRED` | `POST, GET` | Deploys active ruleset requiring signed commits across all eligible repositories (~ALL branches). |
 | **`generate_summary_reports_reviewed.py`** | Reporting | `SAFE_READ_ONLY_LOCAL` | `NONE` | Compiles Phase 1 reconnaissance report and access limitations. |
 | **`generate_summary_reports.py`** | Reporting (Historical) | `SAFE_READ_ONLY_LOCAL` | `NONE` | Original Phase 1 generator (contains unescaped `\U` string in Py3.12+). |
 | **`generate_knowledge_artifacts.py`** | Reporting | `SAFE_READ_ONLY_LOCAL` | `NONE` | Compiles Phase 2 analysis, signatures JSON, and false-positives guide. |
@@ -150,6 +151,8 @@ flowchart TD
    - **Why next**: After the teammate reviews the findings and approves the manifest, Option 2 executes atomic Git Database API commits protected by Compare-and-Swap (CAS) parent verification and immediately verifies the resulting trees.
 3. **Step 3 (Follow-up): Run Option 4 (Security Hardening & Secret Discovery)**:
    - **Why follow-up**: Enforces account-wide `.gitignore` rules (excluding `.env`, `.env.*`, and `.vscode/`) and purges dormant `.vscode/` directories across all repositories.
+4. **Step 4 (Final Lock-in): Run Option 5 (Enforce "Require Signed Commits" Ruleset)**:
+   - **Why lock-in**: Deploys an automated repository ruleset targeting all branches (`~ALL`) that rejects any unsigned or tampered commits, permanently preventing bot amending or author spoofing attacks.
 
 ---
 
